@@ -121,8 +121,31 @@ async function editProduct(productBody, productId){
 //   "weight": 0
 // }
 
-function isDecimal(num){
-    if(num % 2 == 1){
-        return true;
-    }
-}
+// function isDecimal(num){
+//     if(num % 2 == 1){
+//         return true;
+//     }
+// }
+
+//if(found)
+
+// function validatePrice(string){
+//     priceRegex = /^(0|[1-9]\d*)(\.\d{1,2})?$|^0?\.\d{1,2}$/;
+//     let match = string.match(priceRegex);
+// }
+
+
+
+
+
+
+
+// function addErrorStock() {
+//   console.log(`please input an appropriate value for the stock`);
+//   let errorField = document.createElement("p");
+//   errorField.classList.add("errorXYZ");
+//   errorField.textContent = `STOCK MUST BE A NUMBER or greater than 0`;
+
+//   let stockField = container.querySelector(".stock-section");
+//   stockField.appendChild(validateField("stock"));
+// }
