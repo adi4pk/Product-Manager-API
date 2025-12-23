@@ -150,6 +150,28 @@ function renderAddProduct(){
     //   return errorField;
     // }
 
+    function validateDescription(description){
+        let descRegex = /^(?=.*[A-Za-z]).{1,100}$/;
+        let match = descRegex.test(description);        //true or false
+
+        return match;       // --> returns a bool
+    }
+
+
+    function addErrorDesc(){
+        let errorField = document.createElement("p");
+        errorField.classList.add("errorXYZ");
+
+        if(descInpt.value.trim() == ""){
+            errorField.textContent = "must not be empty - DESCRIPTION field";
+        }
+
+        let descriptionField = container.querySelector(".description-section");
+        errorField.textContent = "NO Special characters allowed - DESCRIPTION must contain at least one letter"
+        descriptionField.appendChild(errorField);
+    }
+
+
     function validateName(name){
         let nameRegex = /^(?=.*[A-Za-z])[A-Za-z0-9 _-]{1,25}$/;
         let match = nameRegex.test(name);       // true or false
@@ -276,11 +298,9 @@ function renderAddProduct(){
 
 
 
-           } else if (descInpt.value.trim() === "") {
-             let descriptionField = container.querySelector(".description-section");
-             descriptionField.appendChild(validateField("description"));
-
-             return;
+           } else if (!validateDescription(descInpt.value)) {
+            addErrorDesc();
+            return;
 
            } else if (!validateName(nameInpt.value)) {
             addErrorName();
