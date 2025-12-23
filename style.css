@@ -117,3 +117,17 @@ input[type=text] {
     color: red;
     font-weight: bold;
   }
+
+
+  .category-menu{
+  padding: 10px;
+  font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  border-radius: 2px;
+  border: 2px solid #E7E7E7;
+  border-top-color: darkgray;
+  border-left-color: darkgray;
+  width: 324px;
+  transition: 0.4s;
+  margin-left: 7px;
+  }

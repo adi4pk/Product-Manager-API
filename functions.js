@@ -15,6 +15,7 @@ function createHome(){
     <p>
         <button class="create-product-button">add a new Product</button>
         <button class="edit-product-button">update a Product</button>
+        <button class="delete-product-button">DELETE a Product</button>
     </p>
 
     <table>
@@ -48,12 +49,36 @@ function createHome(){
         renderEditProduct();
     })
 
+    let deletProdBtn = document.querySelector('.delete-product-button');
+    deletProdBtn.addEventListener("click", () =>{
+        renderDeleteProduct();
+    })
+
     attachProducts();       //async function
 
 
 
  }
 
+ function createCategory(categorie){
+
+    let categ = document.createElement("option");
+    categ.classList.add("category-option");
+
+    categ.textContent = categorie.name;
+
+    return categ;
+ }
+
+ function populateCategories(arr){
+
+    let categoryList = document.querySelector(".category-menu");
+    arr.map(element => createCategory(element))
+    .forEach(e => {
+        categoryList.append(e)
+ });           //create the cards in memory, then append them to the DOM container
+
+ }
 
  function createCard(produs){
 
@@ -89,16 +114,25 @@ async function attachProducts(){
 
 
 
+
+
 function renderAddProduct(){
     let container=document.querySelector('.container');
+
+    
 
     container.innerHTML = "";
     container.innerHTML=`
     <h1>New PRODUCT</h1>
     <section>
+        
         <p class="category-section">
             <label for="category">category</label>
-            <input class="category" type="text" id="category">
+            <!--<input class="category" type="text" id="category"> -->
+
+            <select class="category-menu">
+                <option value=""> Please select a category </option>
+            </select>
         </p>
         <p class="description-section">
             <label for="description">description</label>
@@ -132,149 +166,18 @@ function renderAddProduct(){
     </section>
     `
 
-    let categoryInpt = container.querySelector('.category');
-        let descInpt = container.querySelector('.description');
+    loadCategs();
+        //KEEP DEFINED FIELDS INSIDE THE RENDER FUNCTION
+
+        let categSelect = container.querySelector('.category-menu');       // changed the query selector - no more categ field input
+        let descInpt = container.querySelector('.description');     
         let nameInpt = container.querySelector('.prodName');
         let priceInpt = container.querySelector('.price');
         let stockInpt = container.querySelector('.stock');
         let weightInpt = container.querySelector('.weight');
 
-        
-
-    // function validateField(field) {
-    //   console.log(`error: ${field} is missing`);
-    //   let errorField = document.createElement("p");
-    //   errorField.classList.add("errorXYZ");
-    //   errorField.textContent = `Please input the ${field}`;
-
-    //   return errorField;
-    // }
-
-    function validateDescription(description){
-        let descRegex = /^(?=.*[A-Za-z]).{1,100}$/;
-        let match = descRegex.test(description);        //true or false
-
-        return match;       // --> returns a bool
-    }
-
-
-    function addErrorDesc(){
-        let errorField = document.createElement("p");
-        errorField.classList.add("errorXYZ");
-
-        if(descInpt.value.trim() == ""){
-            errorField.textContent = "must not be empty - DESCRIPTION field";
-        }
-
-        let descriptionField = container.querySelector(".description-section");
-        errorField.textContent = "NO Special characters allowed - DESCRIPTION must contain at least one letter"
-        descriptionField.appendChild(errorField);
-    }
-
-
-    function validateName(name){
-        let nameRegex = /^(?=.*[A-Za-z])[A-Za-z0-9 _-]{1,25}$/;
-        let match = nameRegex.test(name);       // true or false
-
-        return match;   // --> returns a bool
-    }
-
-    function addErrorName(){
-        let errorField = document.createElement("p");
-        errorField.classList.add("errorXYZ");
-        
-        if(nameInpt.value.trim() ==""){
-            errorField.textContent = "must not be empty - NAME field";
-        }
-
-        let nameField = container.querySelector(".prodName-section");
-        errorField.textContent = "NO Special characters allowed - Name must contain at least one letter"
-        nameField.appendChild(errorField);
-    
-    }
-
-    function validatePrice(price){
-        let priceRegex = /^(?:0?\.(?:0[1-9]|[1-9]\d?)|[1-9]\d*(?:\.\d{1,2})?)$/;
-        let match = priceRegex.test(price);
-
-        return match;       // --> returns a bool
-    }
-
-    function addErrorPrice(){
-            let errorField = document.createElement("p");
-            errorField.classList.add("errorXYZ");
-            
-
-            if (priceInpt.value.trim() == "") {
-                errorField.textContent = "must not be empty - PRICE field";
-                console.log("price field is empty")
-            } 
-            else if (priceInpt.value < 0 ){     //no need to convert to Number() -- the system can tell whether the value is greater or lower than an INTEGER.
-                errorField.textContent = `must be greater than 0`;
-                console.log("price is lower than 0");
-            }
-
-            let priceField = container.querySelector(".price-section");
-            errorField.textContent = "must be a WHOLE NUMBER";
-            priceField.appendChild(errorField);
-    }
-
-    function validateStock(stock) {
-
-    let stockRegex = /^[1-9]\d*$/;
-    let match = stockRegex.test(stock);         //returns true or false
-
-    return match;
-    }
-
-    function addErrorStock() {
-    console.log(`please input an appropriate value for the stock`);
-    let errorField = document.createElement("p");
-    errorField.classList.add("errorXYZ");
-
-    if (stockInpt.value.trim() == "") {
-        errorField.textContent = "STOCK field cannot be empty";
-    } else {
-        errorField.textContent = "STOCK MUST BE A WHOLE NUMBER or greater than 0";
-    }
-
-    let stockField = container.querySelector(".stock-section");
-    stockField.appendChild(errorField);
-    }
-
-    function validateWeight(weight) {
-
-      let weightRegex = /^(?:0?\.(?:0[1-9]|[1-9]\d?)|[1-9]\d*(?:\.\d{1,2})?)$/;
-      let match = weightRegex.test(weight); // returns true or false
-
-      return match;
-    }
-
-
-    function addErrorWeight(){
-        console.log(`please input an appropriate value for the WEIGHT`);
-        let errorField = document.createElement("p");
-        errorField.classList.add("errorXYZ");
-
-        if (weightInpt.value.trim() == "") {
-            errorField.textContent = "WEIGHT field cannot be empty";
-        } else if (weightInpt.value < 0){
-            errorField.textContent = `WEIGHT must be greater than 0`;
-        } else {
-            errorField.textContent = `WEIGHT MUST BE A NUMBER or greater than 0`;
-        }
-
-        let weightField = container.querySelector(".weight-section");
-        weightField.appendChild(errorField);
-    }
-
-
     let addProductBtn = document.querySelector('.add-product-button');
     addProductBtn.addEventListener("click", () =>{
-
-        // const priceRegex = /^(?:0?\.(?:0[1-9]|[1-9]\d?)|[1-9]\d*(?:\.\d{1,2})?)$/;
-        // const stockRegex = /^[1-9]\d*$/;
-        // const weightRegex = /^(?:0\.(?:0?[1-9]|[1-9]0?)|[1-9]\d*(?:\.\d{1,2})?)$/;
     
         //add the errors conditions here
         // remove error if condition is met - fields are all filled accordingly
@@ -282,21 +185,9 @@ function renderAddProduct(){
         if(errrror){
             errrror.remove();   //remove prior error before an error is generated again
         }
-           if (categoryInpt.value.trim() === "") {
-             let categoryField = container.querySelector(".category-section");
-
-             
-            
-
-             console.log("error: category missing");
-             categoryError = document.createElement("p");
-             categoryError.classList.add("errorXYZ");
-             categoryError.textContent = "Please input the category";
-             categoryField.appendChild(categoryError);
+           if (categSelect.value == "") {
+             addErrorCategory();
              return;
-
-
-
 
            } else if (!validateDescription(descInpt.value)) {
             addErrorDesc();
@@ -313,31 +204,22 @@ function renderAddProduct(){
              return;
 
 
-
-        //    } else if (!priceInpt.value.match(priceRegex) || priceInpt < 0) {
-        //      let priceField = container.querySelector(".price-section");
-        //      priceField.appendChild(validateValue("price"));
-
-        //      return;
-        //    } else if (!validateStock(stockInpt.value)) {
-        //      console.log("error,STOCK field is empty");
-        //      return;
            } else if (!validateStock(stockInpt.value)) {
-            addErrorStock() 
-            
+            addErrorStock();
             return;
            
            } else if (!validateWeight(weightInpt.value)) {
              console.log("error, weight must be a number");
              addErrorWeight();
              return;
+
            } else{
             console.log("it's gonna WORK");
             return;
            }
 
         let produsNou = {       //PRODUCT BODY must be inside eventListener
-          category: categoryInpt.value.trim(),
+          category: categSelect.value.trim(),
           description: descInpt.value.trim(),
           name: nameInpt.value.trim(),
           price: priceNum,
@@ -346,7 +228,7 @@ function renderAddProduct(){
         };
             
         createProduct(produsNou);    //no need for await() before clearing the input fields - the func grabs the values from the time-point when the user presses the button
-            categoryInpt.value =""
+            categSelect.value =""
             descInpt.value ="";
             nameInpt.value ="";
             priceInpt.value ="";
@@ -368,6 +250,8 @@ function renderAddProduct(){
 function renderEditProduct(){
     let container=document.querySelector('.container');
 
+    loadCategs();
+
     container.innerHTML= "";
     container.innerHTML= `
     <h1>Update Product</h1>
@@ -379,7 +263,11 @@ function renderEditProduct(){
 
         <p class="category-section">
             <label for="category">category</label>
-            <input class="category" type="text" id="category">
+            <!--<input class="category" type="text" id="category"> -->
+
+            <select class="category-menu">
+                <option value=""> Please select a category </option>
+            </select>
         </p>
         <p class="description-section">
             <label for="description">description</label>
@@ -413,7 +301,7 @@ function renderEditProduct(){
     </section>
     `
 
-    let categoryInpt = container.querySelector('.category');
+    let categSelect = container.querySelector('.category-menu');       // changed the query selector - no more categ field input
     let descInpt = container.querySelector('.description');
     let nameInpt = container.querySelector('.prodName');
     let priceInpt = container.querySelector('.price');
@@ -422,17 +310,66 @@ function renderEditProduct(){
 
     let productId = container.querySelector('.product-id');
 
+
     let updateProdBtn = document.querySelector('.update-product-button')
     updateProdBtn.addEventListener("click", () =>{
 
+    
+        //add the errors conditions here
+        // remove error if condition is met - fields are all filled accordingly
+        let errrror = document.querySelector('.errorXYZ');
+        if(errrror){
+            errrror.remove();   //remove prior error before an error is generated again
+        }
+        
+        if (categSelect.value == "") {
+             addErrorCategory();
+             return;
+        } else if (!validateDescription(descInpt.value)) {
+            addErrorDesc();
+            return;
+
+           } else if (!validateName(nameInpt.value)) {
+            addErrorName();
+            return;
+
+
+           } else if (validatePrice(priceInpt.value) === false) {
+            console.log(validatePrice(priceInpt.value))
+             addErrorPrice();
+             return;
+
+
+           } else if (!validateStock(stockInpt.value)) {
+            addErrorStock();
+            return;
+           
+           } else if (!validateWeight(weightInpt.value)) {
+             console.log("error, weight must be a number");
+             addErrorWeight();
+             return;
+
+           } else{
+            console.log("it's gonna WORK");
+            return;
+           }
+
         let produsToEdit = {       //PRODUCT BODY must be inside eventListener
-          category: categoryInpt.value.trim(),
+          category: categSelect.value.trim(),
           description: descInpt.value.trim(),
           name: nameInpt.value.trim(),
-          price: priceNum,
-          stock: stockNum,
-          weight: weightNum
+          price: priceInpt.value,
+          stock: stockInpt.value,
+          weight: weightInpt.value
         };
+
+        editProduct(produsToEdit, productId.value);
+            categSelect.value =""
+            descInpt.value ="";
+            nameInpt.value ="";
+            priceInpt.value ="";
+            stockInpt.value ="";
+            weightInpt.value ="";
     })
 
     let cancelEditProductBtn = document.querySelector(".cancel-update-product");
@@ -440,3 +377,185 @@ function renderEditProduct(){
         createHome();
     });
 }
+
+function renderDeleteProduct(){
+    let container=document.querySelector('.container');
+
+     container.innerHTML= "";
+    container.innerHTML= `
+    <h1>Update Product</h1>
+    <section>
+        <p class="id-section">
+            <label for="product-id">Product ID</label>
+            <input class="product-id" type="text" id="product-id">
+        </p>
+
+        <p>
+            <button class="delete-product-button" value="delete a Product">DELETE product</button>
+        </p>
+        <p>
+            <button class="cancel-update-product">Cancel</button>
+        </p>
+    </section>
+    `
+
+    let productId = container.querySelector('.product-id');
+
+    let stergeProdusBtn = document.querySelector('.delete-product-button')
+    stergeProdusBtn.addEventListener("click", () =>{
+
+        // let produsDeSters = {       //PRODUCT BODY must be inside eventListener | NO BODY for DELETE function, only prod ID
+        // };
+
+        stergeProdus(productId.value);
+})
+
+}
+
+
+
+
+function addErrorCategory(){
+    let categSelect = document.querySelector(".category-option");       // including this variable in the func is NOT Mandatory
+
+    let errorField = document.createElement("p");
+    errorField.classList.add("errorXYZ");
+
+    
+        errorField.textContent = "Category must be selected";
+    
+
+    let categoryField = document.querySelector(".category-section");
+    categoryField.appendChild(errorField);
+}
+
+ function validateDescription(description){
+        let descRegex = /^(?=.*[A-Za-z]).{1,100}$/;
+        let match = descRegex.test(description);        //true or false
+
+        return match;       // --> returns a bool
+    }
+
+function addErrorDesc(){
+
+        let descInpt = document.querySelector('.description');                  // new line added to the outside func
+
+        let errorField = document.createElement("p");
+        errorField.classList.add("errorXYZ");
+
+        
+
+        if(descInpt.value.trim() == ""){
+            errorField.textContent = "must not be empty - DESCRIPTION field";
+        }
+
+        let descriptionField = document.querySelector(".description-section");          // new line added to the outside func
+        errorField.textContent = "NO Special characters allowed - DESCRIPTION must contain at least one letter"
+        descriptionField.appendChild(errorField);
+    }
+
+function validateName(name){
+        let nameRegex = /^(?=.*[A-Za-z])[A-Za-z0-9 _-]{1,25}$/;
+        let match = nameRegex.test(name);       // true or false
+
+        return match;   // --> returns a bool
+    }
+
+function addErrorName(){
+
+        let nameInpt = document.querySelector('.prodName');                  // new line added to the outside func
+
+        let errorField = document.createElement("p");
+        errorField.classList.add("errorXYZ");
+        
+        if(nameInpt.value.trim() ==""){
+            errorField.textContent = "must not be empty - NAME field";
+        }
+
+        let nameField = document.querySelector(".prodName-section");
+        errorField.textContent = "NO Special characters allowed - Name must contain at least one letter"
+        nameField.appendChild(errorField);
+    
+    }
+
+function validatePrice(price){
+        let priceRegex = /^(?:0?\.(?:0[1-9]|[1-9]\d?)|[1-9]\d*(?:\.\d{1,2})?)$/;
+        let match = priceRegex.test(price);
+
+        return match;       // --> returns a bool
+    }
+
+function addErrorPrice(){
+        let priceInpt = document.querySelector(".price");
+
+        let errorField = document.createElement("p");
+        errorField.classList.add("errorXYZ");
+        
+
+        if (priceInpt.value.trim() == "") {
+            errorField.textContent = "must not be empty - PRICE field";
+            console.log("price field is empty")
+        } 
+        else if (priceInpt.value < 0 ){     //no need to convert to Number() -- the system can tell whether the value is greater or lower than an INTEGER.
+            errorField.textContent = `must be greater than 0`;
+            console.log("price is lower than 0");
+        }
+
+        let priceField = document.querySelector(".price-section");
+        errorField.textContent = "must be a WHOLE NUMBER";
+        priceField.appendChild(errorField);
+    }
+
+function validateStock(stock) {
+
+    let stockRegex = /^[1-9]\d*$/;
+    let match = stockRegex.test(stock);         //returns true or false
+
+    return match;
+    }
+
+function addErrorStock() {
+
+    let stockInpt = document.querySelector(".stock")
+
+    console.log(`please input an appropriate value for the stock`);
+    let errorField = document.createElement("p");
+    errorField.classList.add("errorXYZ");
+
+    if (stockInpt.value.trim() == "") {
+        errorField.textContent = "STOCK field cannot be empty";
+    } else {
+        errorField.textContent = "STOCK MUST BE A WHOLE NUMBER or greater than 0";
+    }
+
+    let stockField = document.querySelector(".stock-section");
+    stockField.appendChild(errorField);
+    }
+
+function validateWeight(weight) {
+
+      let weightRegex = /^(?:0?\.(?:0[1-9]|[1-9]\d?)|[1-9]\d*(?:\.\d{1,2})?)$/;
+      let match = weightRegex.test(weight); // returns true or false
+
+      return match;
+    }
+
+function addErrorWeight(){
+
+        let weightInpt = document.querySelector(".weight");
+
+        console.log(`please input an appropriate value for the WEIGHT`);
+        let errorField = document.createElement("p");
+        errorField.classList.add("errorXYZ");
+
+        if (weightInpt.value.trim() == "") {
+            errorField.textContent = "WEIGHT field cannot be empty";
+        } else if (weightInpt.value < 0){
+            errorField.textContent = `WEIGHT must be greater than 0`;
+        } else {
+            errorField.textContent = `WEIGHT MUST BE A NUMBER or greater than 0`;
+        }
+
+        let weightField = document.querySelector(".weight-section");
+        weightField.appendChild(errorField);
+    }

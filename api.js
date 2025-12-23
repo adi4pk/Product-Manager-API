@@ -61,6 +61,26 @@ async function getToken(){
 
 }
 
+async function getCategories(){
+    
+    let token = await getToken();
+
+    let response = await api("/categories/all", "GET", null, token);
+    let data = await response.json();
+
+    // console.log(data.list.name);
+
+    return data.list;
+}
+
+
+async function loadCategs(){
+
+    let categoryList = await getCategories();
+    populateCategories(categoryList);
+
+    console.log(categoryList);
+}
 
 async function getProducts(){       //add error here - change return outcome
 
@@ -84,10 +104,14 @@ async function createProduct(productBody){
 }
 
 
-async function editProduct(productBody, productId){
+async function editProduct(productBody, rawId){
     let token = await getToken();
 
-    let response = await api(`/products/edit/${productId}`, productBody, token);
+    let produsId = Number(rawId);
+    console.log(produsId);
+    console.log(rawId);
+
+    let response = await api(`/products/edit/${produsId}`, 'PUT', productBody, token);
     const produsEditat = await response.json();
 
     console.log(produsEditat);
@@ -95,6 +119,19 @@ async function editProduct(productBody, productId){
     return produsEditat;
 }
 
+
+async function stergeProdus(rawId){
+    let token = await getToken();
+
+    let produsId = Number(rawId);
+    
+    let response = await api(`/products/delete/${produsId}`, 'DELETE', null, token);
+    const produsSters = await response.json();
+
+    console.log('produsul a fost sters:', produsSters);
+
+    return produsSters;
+}
 
 
 
@@ -128,12 +165,6 @@ async function editProduct(productBody, productId){
 // }
 
 //if(found)
-
-// function validatePrice(string){
-//     priceRegex = /^(0|[1-9]\d*)(\.\d{1,2})?$|^0?\.\d{1,2}$/;
-//     let match = string.match(priceRegex);
-// }
-
 
 
 
