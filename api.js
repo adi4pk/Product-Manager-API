@@ -61,6 +61,27 @@ async function getToken(){
 
 }
 
+async function userLogin(username, pass){
+    let response = await api("/users/login", "POST", {email:username, password:pass});  //<--body
+
+    const {jwtToken : token} = await response.json();
+
+    console.log(`user is logged on: ${username}`, token);
+    return token;
+}
+
+// async function getUsers(){
+
+//     let token = await getToken();
+
+//     let response = await api("/users/all", "GET", null, token);
+
+//     let data = await response.json();
+
+//     console.log(data.list);
+//     return data.list;
+// }
+
 async function getCategories(){
     
     let token = await getToken();
@@ -82,14 +103,26 @@ async function loadCategs(){
     console.log(categoryList);
 }
 
-async function getProducts(){       //add error here - change return outcome
+async function getAllProducts(){       //add error here - change return outcome
 
-    let token = await getToken();
+    // let token = await getToken();
+    let token = localStorage.getItem('authToken');
 
     let response = await api("/products/all", "GET", body=null, token);
     let data = await response.json();
 
     return data.list;
+}
+
+async function addToCart(productBody){
+    let token = localStorage.getItem('authToken');
+
+    let response = await api("/cart/products", 'POST', productBody, token);
+    let data = await response.json();
+
+    console.log(data);
+    return data;
+
 }
 
 async function createProduct(productBody){
@@ -136,40 +169,6 @@ async function stergeProdus(rawId){
 
 
 
-// //faulty function
-// function errorThrow(field){
-//     console.log(`error, ${field} missing`);
-//     let field = container.querySelector(`.${field}-section`);
-//     `let ${field}error` = document.createElement('p');
-//     `${field}error`.textContent = `ERROR please input ${field}` 
-//     field.appendChild(`${field}error`);
-// }
-
-
-
-
-
-// {
-//   "category": "string",
-//   "description": "string",
-//   "name": "string",
-//   "price": 0,
-//   "stock": 0,
-//   "weight": 0
-// }
-
-// function isDecimal(num){
-//     if(num % 2 == 1){
-//         return true;
-//     }
-// }
-
-//if(found)
-
-
-
-
-
 
 // function addErrorStock() {
 //   console.log(`please input an appropriate value for the stock`);
@@ -180,3 +179,64 @@ async function stergeProdus(rawId){
 //   let stockField = container.querySelector(".stock-section");
 //   stockField.appendChild(validateField("stock"));
 // }
+
+
+function testingAddtoCart(event){
+
+    let btn = event.target.closest(".order-product-button");
+    
+        //get enclosing row
+        let row = btn.closest('tr');
+        if(!row) return null;
+
+        let creationDate = row.querySelector("#creation-date");
+        let product_id = row.querySelector(".prod-id");
+        let product_name = row.querySelector(".prod-name");
+        let product_price = row.querySelector(".prod-price");
+
+        if (!creationDate || !product_id || !product_name || !product_price) return null;
+
+        const item = {
+            date: creationDate.textContent,
+            id: product_id.textContent,
+            name: product_name.textContent,
+            price: product_price.textContent
+        }
+
+        console.log(`the item was created on:${item.date}, and the product id is:${item.id}`);
+        return item;
+        }
+    
+
+        function createCartProduct(produs){
+            let card = document.createElement("tr");
+            card.classList.add("shop-card");
+
+            card.innerHTML = `
+                <td class="image">
+                    <img src="">
+                </td>
+                <td class="prod-id">${produs.id}</td>
+                <td class="name">${produs.name}</td>
+                <td class="prod-price">${produs.price}</td>
+                `;
+
+            return card;
+        }
+
+        function attachProdsToCard(arr){
+            
+            let shopCart = document.querySelector(".cart-list");
+
+            shopCart.innerHTML = "";
+
+            let prodList = arr.map((e) => createCartProduct(e));
+            prodList.forEach((prod) => {
+                shopCart.appendChild(prod);
+            })
+        }
+
+
+
+
+

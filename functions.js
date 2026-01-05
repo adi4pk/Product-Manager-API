@@ -1,5 +1,57 @@
 
 
+function createLoginPage(){
+    let container = document.querySelector(".container");
+
+    container.innerHTML=`
+    
+    <section class="login-section">
+        <h1>Online SHOP</h1>
+
+        <div class="login-div">
+        <label for="username">Username</label>
+        <input class="loginInpt" id="loginInpt" name="username" type="text">
+        </div>
+
+        <div class="pass-div">
+        <label for="pass">Password</label>
+        <input class="passInpt" name="pass" type="password">
+        </div>
+        
+        <button class="login-button">Login</button>
+    </section>
+
+    <section class="all-credentials-section">
+    <div class="username-div">
+        <h2>Accepted usernames are:</h2>
+        <ul class="user-list">
+            
+        </ul>
+    </div>
+
+    <div class="password-div">
+        <h2>Password for all users:</h2>
+        <p>test123456</p>
+    </section>`
+
+    // populateUsers(getUsers());   -- no need to populate user list
+
+    let loginBtn = document.querySelector(".login-button");
+    loginBtn.addEventListener("click", async () => {
+
+        let usernameInpt = document.querySelector(".loginInpt");
+        let passwordInpt = document.querySelector(".passInpt");
+
+
+                //func userLogin(username, pass)
+        let myToken = await userLogin(usernameInpt.value, passwordInpt.value);
+        localStorage.setItem('authToken', myToken);
+
+        createHome();
+    })
+}
+
+
 function createHome(){
 
 
@@ -9,9 +61,7 @@ function createHome(){
     container.innerHTML=`
     
     
-        <h1>
-        PRODUCTS
-    </h1>
+    <h1>PRODUCTS</h1>
     <p>
         <button class="create-product-button">add a new Product</button>
         <button class="edit-product-button">update a Product</button>
@@ -20,7 +70,7 @@ function createHome(){
 
     <table>
         <thead>
-            <tr>
+            <tr class>
                 <th>Prod ID</th>
                 <th>Category</th>
                 <th>Date</th>
@@ -31,13 +81,56 @@ function createHome(){
                 <th>weight</th>
             </tr>
         </thead>
+        
         <tbody class="table-body">
 
         </tbody>
 
+    </table>
 
 
-    </table>`
+    
+    <div class="cart-tab">
+        <h1>Shopping Cart</h1>
+
+        <table class="cart-list">
+            <thead class="thead-row">
+                <tr>
+                    <th>image</th>
+                    <th>NAME</th>
+                    <th>price</th>
+                    <th>quantity</th>
+                </tr>
+            </thead>
+        
+            <tbody class="cart-tbody">
+                <tr class="shop-card">
+                        <td class="image">image
+                            <img src="">
+                        </td>
+                        <td class="name">NAME</td>
+                        <td class="totalPrice">$2000</td>
+                        <td class="quantity">quantity</td>
+                </tr>  
+
+                <tr class="shop-card">
+                        <td class="image">iamge
+                            <img src="">
+                        </td>
+                        <td class="name">NAME</td>
+                        <td class="totalPrice">$2000</td>
+                        <td class="quantity">quantity</td>
+                </tr>
+
+             </tbody>
+        </table>
+        
+        <div class="buttons">
+        <button class="close">CLOSE</button>
+        <button class="send-order">place order</button>
+        </div>
+
+        </div>`
 
     let addNewProductBtn = document.querySelector('.create-product-button');
     addNewProductBtn.addEventListener("click", () => {
@@ -53,12 +146,61 @@ function createHome(){
     deletProdBtn.addEventListener("click", () =>{
         renderDeleteProduct();
     })
-
+    
     attachProducts();       //async function
+
+    // let orderBtn = container.querySelector('.order-product-button'); --- WHY?????
+    // orderBtn.addEventListener("click", () => {
+    //     // let obj = ev.target;
+    //     console.log("test")
+
+    // })
+
+    const produseCart = [];
+
+    container.addEventListener("click", (ev) => {
+       
+        let btn = ev.target.closest(".order-product-button");
+        if(!btn) return;
+        
+        const item = testingAddtoCart(ev);      //returns the object
+        produseCart.push(item);
+        attachProdsToCard(produseCart);
+        
+        console.log(produseCart);
+
+
+    });
+    
 
 
 
  }
+
+
+
+
+
+
+// function createUserCard(user){
+
+//     let card = document.createElement("li");
+//     card.classList.add("li-user");
+
+//     card.textContent=user.email;
+
+//     return card;
+// }
+
+// async function populateUsers(){
+
+//     let arr = await getUsers();
+
+//     let userList = document.querySelector(".user-list");
+//     arr.map(user => createUserCard(user)).forEach(user => {
+//         userList.append(user);
+//     });
+// }
 
  function createCategory(categorie){
 
@@ -85,14 +227,15 @@ function createHome(){
     let card = document.createElement('tr');
     card.classList.add('card');
     card.innerHTML =
-                `<td>${produs.id}</td>
-                <td>${produs.category}</td>
-                <td>${produs.createDate}</td>
+                `<td class="prod-id">${produs.id}</td>
+                <td class="prod-cat">${produs.category}</td>
+                <td id="creation-date">${produs.createDate}</td>
                 <td>${produs.description}</td>
-                <td>${produs.name}</td>
-                <td>${produs.price}</td>
+                <td class="prod-name">${produs.name}</td>
+                <td class="prod-price">${produs.price}</td>
                 <td>${produs.stock}</td>
-                <td>${produs.weight}</td>`;
+                <td>${produs.weight}</td>
+                <button class="order-product-button">add to cart</button>`;
 
     return card;
 }
@@ -100,7 +243,7 @@ function createHome(){
 async function attachProducts(){     
 
     let tableContainer=document.querySelector(".table-body")
-    let arr = await getProducts();
+    let arr = await getAllProducts();
 
     tableContainer.innerHTML = "";
     const produse = arr.map((e) => createCard(e));
