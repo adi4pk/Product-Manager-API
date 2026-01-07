@@ -103,14 +103,17 @@ input[type=text] {
   padding: 10px 14px 12px;
   font-size: 14px;
   border-radius: 2px;
+  font-weight: bold;
   cursor: pointer;
   
   margin-left: 140px;
-  transition: 0.4s;
+  transition: 0.2s;
 }
 
 .add-product-button:hover {
     background-color: #01b189;
+    color: rgba(245, 245, 245, 0.836);
+    border: 2px solid rgb(80, 255, 153);
   }
 
   .errorXYZ{
@@ -183,18 +186,37 @@ input[type=text] {
 
 /* /////////// SHOPPING CART //////// */
 
+
+
 .cart-tab{
   width: 400px;
   background-color: rgb(50, 48, 48);
   color: #eee;
   position: fixed;
   
-  inset: 0 0 0 auto;
+  inset: 0 -400px 0 auto;
   display: grid;
   grid-template-rows: 100px 1fr 70px;
   /* grid-template-columns: 400px; */
-  
+
+  transition: .3s;
+  transform: translateX(0px)
 }
+
+
+ /* Shopping cart window slide-in effect */
+
+.cart-tab{
+  transition: .3s;
+  transform: translateX(0px);
+}
+
+.showCart{
+  inset: 0 0 0 auto;
+
+}
+
+
 
 .cart-tab h1{
   font-family: "Poppins", sans-serif;
@@ -229,6 +251,24 @@ input[type=text] {
 }
 
 
+.error-cart-empty{
+  color: #f7672e;
+  width: 100%;
+  font-weight: bold;
+  text-align: center;
+  border-top: none;
+}
+
+.pop{
+  animation: pop 500ms ease-out;
+}
+
+@keyframes pop{
+  0% {transform: scale(1);}
+  55% {transform: scale(1.15);}
+  100% {transform: scale(1);}
+}
+
 
 
 
@@ -260,3 +300,15 @@ input[type=text] {
   background-color: #e74922;
 }
 
+
+/* .container{
+  transition: transform 5.s;
+} */
+
+
+
+
+
+.hide{
+  /* display: none; */
+}

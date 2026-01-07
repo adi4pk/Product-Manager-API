@@ -56,7 +56,7 @@ function createHome(){
 
 
     let container=document.querySelector(".container");
-
+    // let cart = document.querySelector(".cart-tab");
 
     container.innerHTML=`
     
@@ -66,6 +66,8 @@ function createHome(){
         <button class="create-product-button">add a new Product</button>
         <button class="edit-product-button">update a Product</button>
         <button class="delete-product-button">DELETE a Product</button>
+        <button class="shopping-cart-button">see my CART</button>
+        <button class="see-orders-button">view Order history</button>
     </p>
 
     <table>
@@ -90,15 +92,14 @@ function createHome(){
 
 
     
-    <div class="cart-tab">
+    <div class="cart-tab hide">
         <h1>Shopping Cart</h1>
 
         <table class="cart-list">
             <thead class="thead-row">
                 <tr>
-                    <th>image</th>
-                    <th>NAME</th>
-                    <th>price</th>
+                    <th>ID</th>
+                    <th>name</th>
                     <th>quantity</th>
                 </tr>
             </thead>
@@ -146,36 +147,149 @@ function createHome(){
     deletProdBtn.addEventListener("click", () =>{
         renderDeleteProduct();
     })
+
+    let seeCartBtn = document.querySelector(".shopping-cart-button");
+    seeCartBtn.addEventListener("click", () =>{
+        let cart = document.querySelector(".cart-tab")
+        cart.classList.toggle("showCart");
+
+        attachCartProducts(cartState); // runs and refreshes the cart whenever cart is clicked
+        
+    })
+
+    let viewOrdersBtn = document.querySelector(".see-orders-button");
+    viewOrdersBtn.addEventListener("click", () =>{
+        renderSeeUserOrders();
+    })
+
+    let closeCartBtn = document.querySelector(".close");
+    closeCartBtn.addEventListener("click", () =>{
+        let cart = document.querySelector(".cart-tab")
+        cart.classList.toggle("showCart");
+    })
     
-    attachProducts();       //async function
+    attachProducts();       //async function -- 
+    
+
 
     // let orderBtn = container.querySelector('.order-product-button'); --- WHY?????
     // orderBtn.addEventListener("click", () => {
     //     // let obj = ev.target;
     //     console.log("test")
 
-    // })
 
-    const produseCart = [];
 
-    container.addEventListener("click", (ev) => {
+    container.addEventListener("click", async (ev) => {
        
         let btn = ev.target.closest(".order-product-button");
         if(!btn) return;
         
-        const item = testingAddtoCart(ev);      //returns the object
-        produseCart.push(item);
-        attachProdsToCard(produseCart);
-        
-        console.log(produseCart);
+        let item = btn.closest('tr');
 
+        let product_id = item.querySelector(".prod-id");        //e.g. id: 3
+        let product_name = item.querySelector(".prod-name");
+        let product_price = item.querySelector(".prod-price");
+        let product_quantity = item.querySelector(".prod-quantity");
+
+        console.log(product_id.textContent, product_name.textContent, product_quantity.textContent);
+
+        let cartI={
+
+            id:product_id.textContent,      //id: 3
+            name:product_name.textContent,
+            quantity:1
+        }
+      
+        addProductToCart(cartI);        //push the object to the data.js array of objects
+        addItemToCart(cartI.id, cartI.quantity)
 
     });
+
+    let sendOrderBtn = document.querySelector(".send-order");
+
+    sendOrderBtn.addEventListener("click", async () =>{
+
+    let body ={ orderDate: "2026-01-07",
+                productList: cartState.map(({id, quantity}) => ({
+                    productId: +id,
+                    quantity: quantity
+                })
+            )}
+
+    let cart = document.querySelector(".cart-tbody");
+    let error = document.querySelector(".error-cart-empty");
+    if (error) {
+        error.remove();
+    }
+
+    if(cartState.length < 1){
+        console.log("CART IS EMPTY");
+        
+        let errorCartEmpty = document.createElement("h2");
+        cart.appendChild(errorCartEmpty);
+        
+        errorCartEmpty.classList.add("error-cart-empty");
+        errorCartEmpty.classList.add("pop");
+        errorCartEmpty.textContent="Your cart is empty";
+
+
+        return;
+    }
+
+    // sendOrder(body);
     
+    let cartBody = document.querySelector(".cart-tbody");
+    cartBody.innerHTML="";
 
+    console.log("ORDER placed successfully")
+    cartState = [];     //empty the cartState in the DOM after order is sent.
 
-
+ })
+    
  }
+ 
+ 
+
+
+ // functions for the SHOPPING CART --- NOT used
+
+function testingAddtoCart(event){
+
+        let btn = event.target.closest(".order-product-button");
+        
+            //get enclosing row
+            let row = btn.closest('tr');
+            if(!row) return null;
+
+            let creationDate = row.querySelector("#creation-date");
+            let product_id = row.querySelector(".prod-id");
+            let product_name = row.querySelector(".prod-name");
+            let product_price = row.querySelector(".prod-price");
+
+            if (!creationDate || !product_id || !product_name || !product_price) return null;
+
+            const item = {
+                date: creationDate.textContent,
+                id: product_id.textContent,
+                name: product_name.textContent,
+                price: product_price.textContent
+            }
+
+            console.log(`the item was created on:${item.date}, and the product id is:${item.id}`);
+            return item;
+            }
+    
+function attachProdsToCard(arr){
+            
+            let shopCart = document.querySelector(".cart-tbody");
+
+            shopCart.innerHTML = "";
+
+            let prodList = arr.map((e) => createCartProduct(e));
+            prodList.forEach((prod) => {
+                shopCart.appendChild(prod);
+            })
+        }
 
 
 
@@ -233,8 +347,8 @@ function createHome(){
                 <td>${produs.description}</td>
                 <td class="prod-name">${produs.name}</td>
                 <td class="prod-price">${produs.price}</td>
-                <td>${produs.stock}</td>
-                <td>${produs.weight}</td>
+                <td class="prod-quantity">${produs.stock}</td>
+                <td class=""prod-weight">${produs.weight}</td>
                 <button class="order-product-button">add to cart</button>`;
 
     return card;
@@ -332,7 +446,8 @@ function renderAddProduct(){
              addErrorCategory();
              return;
 
-           } else if (!validateDescription(descInpt.value)) {
+           } else 
+            if (!validateDescription(descInpt.value)) {
             addErrorDesc();
             return;
 
@@ -494,10 +609,7 @@ function renderEditProduct(){
 
            } else{
             console.log("it's gonna WORK");
-            return;
-           }
-
-        let produsToEdit = {       //PRODUCT BODY must be inside eventListener
+            let produsToEdit = {       //PRODUCT BODY must be inside eventListener
           category: categSelect.value.trim(),
           description: descInpt.value.trim(),
           name: nameInpt.value.trim(),
@@ -513,6 +625,9 @@ function renderEditProduct(){
             priceInpt.value ="";
             stockInpt.value ="";
             weightInpt.value ="";
+           }
+
+        
     })
 
     let cancelEditProductBtn = document.querySelector(".cancel-update-product");
@@ -526,7 +641,7 @@ function renderDeleteProduct(){
 
      container.innerHTML= "";
     container.innerHTML= `
-    <h1>Update Product</h1>
+    <h1>Delete Product</h1>
     <section>
         <p class="id-section">
             <label for="product-id">Product ID</label>
@@ -537,7 +652,7 @@ function renderDeleteProduct(){
             <button class="delete-product-button" value="delete a Product">DELETE product</button>
         </p>
         <p>
-            <button class="cancel-update-product">Cancel</button>
+            <button class="cancel-delete-product">Cancel</button>
         </p>
     </section>
     `
@@ -553,8 +668,46 @@ function renderDeleteProduct(){
         stergeProdus(productId.value);
 })
 
+    let cancelEditProductBtn = document.querySelector(".cancel-delete-product");
+    cancelEditProductBtn.addEventListener("click", () => {
+        createHome();
+    });
+
 }
 
+function renderSeeUserOrders(){
+    let container = document.querySelector(".container");
+
+    container.innerHTML = "";
+    container.innerHTML = `
+    <h1>ORDER History</h1>
+    <button class="cancel-see-orders">Home</button>
+
+    <table>
+        <thead>
+            <tr class>
+                <th>Prod ID</th>
+                <th>Date</th>
+                <th>orderEmail</th>
+                <th>shipping address</th>
+                <th>amount</th>
+            </tr>
+        </thead>
+        
+        <tbody class="table-body">
+
+        </tbody>
+
+    </table>
+    `
+
+    attachOrders();
+
+    let cancelOrderHistoryBtn = document.querySelector(".cancel-see-orders");
+        cancelOrderHistoryBtn.addEventListener("click", () => {
+              createHome();
+           });
+}
 
 
 
@@ -702,3 +855,85 @@ function addErrorWeight(){
         let weightField = document.querySelector(".weight-section");
         weightField.appendChild(errorField);
     }
+
+
+
+    //load cart
+
+function createCartProduct(product){
+
+    let card = document.createElement('tr');
+    card.classList.add("shop-card");
+
+    card.innerHTML=`
+                <td class="image">
+                    <img src="">
+                </td>
+                <td class="prod-id">${product.id}</td>
+                <td class="name">${product.name}</td>
+                <td class="prod-quantity">${product.quantity}</td>`;
+
+    return card;
+}
+
+function attachCartProducts(arr){       //runs on the array of objects -- cartState[]
+
+
+    let cartBody = document.querySelector(".cart-tbody");
+    cartBody.innerHTML="";
+
+    let produseCart = arr.map((e) => createCartProduct(e));
+    produseCart.forEach((e) =>{
+        cartBody.appendChild(e);
+    }) 
+}
+
+function addProductToCart(cartItem){
+
+   
+    let flag=false;
+    for(let i=0;i<cartState.length;i++){
+        if(cartState[i].id==cartItem.id){
+        cartState[i].quantity+=cartItem.quantity;
+        flag=true;
+        }
+    }
+    if(!flag){
+        cartState.push(cartItem);
+    }
+
+}
+
+
+//// ORDER HISTORY ///
+
+function createOrderedCard(item){
+
+    let card = document.createElement('tr');
+    card.classList.add('card');
+
+    card.innerHTML = `
+    <td class="prod-id">${item.id}</td>
+    <td class="prod-order-date">${item.orderDate}</td>
+    <td class="prod-order-email">${item.orderEmail}</td>
+    <td class="prod-shipping-address">${item.shippingAddress}</td>
+    <td class="prod-amount">${item.amount}</td>
+    `
+
+    return card
+
+}
+
+async function attachOrders(){
+
+    let tableContainer = document.querySelector(".table-body");
+    let arr = await getUserOrders();
+
+    tableContainer.innerHTML="";
+    const orderedProducts = arr.map((e) => createOrderedCard(e))
+    orderedProducts.forEach((produs) => {
+        tableContainer.appendChild(produs);
+    })
+
+    console.log(arr);
+}
