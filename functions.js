@@ -91,47 +91,29 @@ function createHome(){
     </table>
 
 
-    
-    <div class="cart-tab hide">
-        <h1>Shopping Cart</h1>
-
-        <table class="cart-list">
-            <thead class="thead-row">
-                <tr>
-                    <th>ID</th>
-                    <th>name</th>
-                    <th>quantity</th>
-                </tr>
-            </thead>
+        <aside class="cart-tab hide">
+            <header class="shopcart-header">
+                <h1>Shopping Cart</h1>
+                <div class="cart-row-header">
+                    <div class="cart-header-id">ID</div>
+                    <div class="cart-header-name">NAME</div>
+                    <div class="cart-header-quantity">quantity</div>
+                </div>
+            </header>
         
-            <tbody class="cart-tbody">
-                <tr class="shop-card">
-                        <td class="image">image
-                            <img src="">
-                        </td>
-                        <td class="name">NAME</td>
-                        <td class="totalPrice">$2000</td>
-                        <td class="quantity">quantity</td>
-                </tr>  
+            <div class="cart-body">
+                
 
-                <tr class="shop-card">
-                        <td class="image">iamge
-                            <img src="">
-                        </td>
-                        <td class="name">NAME</td>
-                        <td class="totalPrice">$2000</td>
-                        <td class="quantity">quantity</td>
-                </tr>
+                <div class="shop-card">
 
-             </tbody>
-        </table>
-        
-        <div class="buttons">
-        <button class="close">CLOSE</button>
-        <button class="send-order">place order</button>
-        </div>
+                </div>
+            </div>
 
-        </div>`
+            <footer class="button-section">
+                <button class="close">CLOSE</button>
+                <button class="send-order">place order</button>
+            </footer>
+        </aside>`
 
     let addNewProductBtn = document.querySelector('.create-product-button');
     addNewProductBtn.addEventListener("click", () => {
@@ -177,9 +159,51 @@ function createHome(){
     //     // let obj = ev.target;
     //     console.log("test")
 
+    let sendOrderBtn = document.querySelector(".send-order");
+
+    sendOrderBtn.addEventListener("click", async () =>{
+
+    let body ={ orderDate: "2026-01-07",
+                productList: cartState.map(({id, quantity}) => ({
+                    productId: +id,
+                    quantity: quantity
+                })
+            )}
+
+    let cart = document.querySelector(".cart-body");
+    let error = document.querySelector(".error-cart-empty");
+    if (error) {
+        error.remove();
+    }
+
+    if(cartState.length < 1){
+        console.log("CART IS EMPTY");
+        
+        let errorCartEmpty = document.createElement("h2");
+        cart.appendChild(errorCartEmpty);
+        
+        errorCartEmpty.classList.add("error-cart-empty");
+        errorCartEmpty.classList.add("pop");
+        errorCartEmpty.textContent="Your cart is empty";
 
 
-    container.addEventListener("click", async (ev) => {
+        return;
+    }
+
+    
+    // await sendOrder(body);
+    console.log(`The quantity of the item will be sent: ${body.productList.quantity}`);
+
+    let cartBody = document.querySelector(".cart-body");
+    cartBody.innerHTML="";
+
+    console.log("ORDER placed successfully")
+    cartState = [];     //empty the cartState in the DOM after order is sent.
+
+ })
+
+
+    container.addEventListener("click", async (ev) => {     //add item to CART btn
        
         let btn = ev.target.closest(".order-product-button");
         if(!btn) return;
@@ -203,48 +227,112 @@ function createHome(){
         addProductToCart(cartI);        //push the object to the data.js array of objects
         addItemToCart(cartI.id, cartI.quantity)
 
+        // let cartBody = document.querySelector(".cart-tbody");
+        // cartBody.innerHTML="";
+
+        attachCartProducts(cartState);
     });
 
-    let sendOrderBtn = document.querySelector(".send-order");
-
-    sendOrderBtn.addEventListener("click", async () =>{
-
-    let body ={ orderDate: "2026-01-07",
-                productList: cartState.map(({id, quantity}) => ({
-                    productId: +id,
-                    quantity: quantity
-                })
-            )}
-
-    let cart = document.querySelector(".cart-tbody");
-    let error = document.querySelector(".error-cart-empty");
-    if (error) {
-        error.remove();
-    }
-
-    if(cartState.length < 1){
-        console.log("CART IS EMPTY");
-        
-        let errorCartEmpty = document.createElement("h2");
-        cart.appendChild(errorCartEmpty);
-        
-        errorCartEmpty.classList.add("error-cart-empty");
-        errorCartEmpty.classList.add("pop");
-        errorCartEmpty.textContent="Your cart is empty";
-
-
-        return;
-    }
-
-    // sendOrder(body);
     
-    let cartBody = document.querySelector(".cart-tbody");
-    cartBody.innerHTML="";
+    let cartBody = document.querySelector(".cart-body");
+    cartBody.addEventListener("click", (ev) =>{
 
-    console.log("ORDER placed successfully")
-    cartState = [];     //empty the cartState in the DOM after order is sent.
+        let quantityUpBtn = ev.target.closest(".plus");
+        if(!quantityUpBtn) return;
 
- })
+        let item = quantityUpBtn.closest('.shop-card');
+
+        let product_id = item.querySelector(".prod-id");
+        let product_name = item.querySelector(".name");
+        let product_quantity = item.querySelector(".prod-qty");
+
+        console.log(typeof(product_quantity))
+        
+
+        let cartI={
+
+            id:product_id.textContent,      //id: 3
+            name:product_name.textContent,
+            // quantity: Number(product_quantity.textContent)
+            quantity: +product_quantity.textContent +1
+
+        }
+
+        console.log(typeof(cartI.name))
+        console.log(cartI.quantity)
+        increaseItemQuantityCart(cartI);
+
+        product_quantity.textContent = cartI.quantity;
+
+        // console.log(typeof(cartI.quantity))
+
+        // product_quantity.textContent = 123
+        // product_quantity.textContent = 
+
+        // addItemToCart(cartI.id, cartI.quantity)
+        
+    })
+
+    cartBody.addEventListener("click", (ev) =>{
+
+        let quantityDownBtn = ev.target.closest(".minus");
+        if(!quantityDownBtn) return;
+
+        let item = quantityDownBtn.closest('.shop-card');
+        
+        let product_id = item.querySelector(".prod-id");
+        let product_name = item.querySelector(".name");
+        let product_quantity = item.querySelector('.prod-qty')
+
+        console.log(item);
+
+        let cartI = {
+            id: product_id.textContent,
+            name: product_name.textContent,
+            quantity: +product_quantity.textContent
+        }
+
+        
+
+        // if(Number(product_quantity.textContent) >1){
+        //     cartI.quantity = +product_quantity -1
+        //     decreaseItemQuantityCart(cartI);
+        // } else 
+            if(Number(product_quantity.textContent) == 1){
+            deleteItemFromCart(cartI);
+            item.remove();
+        }   else{
+            cartI.quantity = +product_quantity.textContent -1
+            decreaseItemQuantityCart(cartI)
+        }
+
+        
+
+        // if(Number(product_quantity.textContent) > 1){
+        //     let cartI = {
+        //     id: product_id.textContent,
+        //     name: product_name.textContent,
+        //     quantity: +product_quantity.textContent -1
+        // }
+
+        // decreaseItemQuantityCart(cartI);
+
+        // product_quantity.textContent = cartI.quantity;
+
+        // } else if(Number(product_quantity.textContent) == 1){
+        //     let cartI = {
+        //     id: product_id.textContent,
+        //     name: product_name.textContent,
+        //     quantity: +product_quantity.textContent
+        //     // quantity: 0
+        // }
+        //     console.log("ITEM DELETED")
+            
+        //     deleteItemFromCart(cartI);
+        //     item.remove();
+        // }
+        
+    })
     
  }
  
@@ -281,7 +369,7 @@ function testingAddtoCart(event){
     
 function attachProdsToCard(arr){
             
-            let shopCart = document.querySelector(".cart-tbody");
+            let shopCart = document.querySelector(".cart-body");
 
             shopCart.innerHTML = "";
 
@@ -686,7 +774,7 @@ function renderSeeUserOrders(){
     <table>
         <thead>
             <tr class>
-                <th>Prod ID</th>
+                <th>Order ID</th>
                 <th>Date</th>
                 <th>orderEmail</th>
                 <th>shipping address</th>
@@ -698,6 +786,23 @@ function renderSeeUserOrders(){
 
         </tbody>
 
+        <tfoot class="table-footer">
+            <tr>
+                <th>TOTALS</th>
+                <th></th>
+                
+            </tr>
+            <tr>
+                <th>Orders</th>
+                <th>money spent</th>
+                
+            </tr>
+            <tr>
+                
+                <td class="total-orders-number"></td>
+                <td class="money-spent-amount"></td>
+            </tr>
+        </tfoot>
     </table>
     `
 
@@ -858,20 +963,25 @@ function addErrorWeight(){
 
 
 
-    //load cart
+    //LOAD CART
 
 function createCartProduct(product){
 
-    let card = document.createElement('tr');
+    let card = document.createElement('div');
     card.classList.add("shop-card");
 
     card.innerHTML=`
-                <td class="image">
-                    <img src="">
-                </td>
-                <td class="prod-id">${product.id}</td>
-                <td class="name">${product.name}</td>
-                <td class="prod-quantity">${product.quantity}</td>`;
+                
+                <div class="prod-id cell">${product.id}</div>
+                <div class="name cell">${product.name}</div>
+                
+                    <div class="qty-group cell">
+                    <button class="plus">+</button>
+                    <span class="prod-qty">${product.quantity}</span>
+                    <button class="minus">-</button>
+                    </div>
+                
+                `;
 
     return card;
 }
@@ -879,7 +989,7 @@ function createCartProduct(product){
 function attachCartProducts(arr){       //runs on the array of objects -- cartState[]
 
 
-    let cartBody = document.querySelector(".cart-tbody");
+    let cartBody = document.querySelector(".cart-body");
     cartBody.innerHTML="";
 
     let produseCart = arr.map((e) => createCartProduct(e));
@@ -888,13 +998,13 @@ function attachCartProducts(arr){       //runs on the array of objects -- cartSt
     }) 
 }
 
-function addProductToCart(cartItem){
+function addProductToCart(cartItem){     //only add item to cart, NO quantity increase/decrease
 
    
     let flag=false;
     for(let i=0;i<cartState.length;i++){
         if(cartState[i].id==cartItem.id){
-        cartState[i].quantity+=cartItem.quantity;
+        // cartState[i].quantity+=cartItem.quantity;
         flag=true;
         }
     }
@@ -902,6 +1012,50 @@ function addProductToCart(cartItem){
         cartState.push(cartItem);
     }
 
+}
+
+function increaseItemQuantityCart(cartItem){
+    //button pressed
+
+    let flag=false;
+    for(let i=0; i<cartState.length; i++){
+        if(cartState[i].id==cartItem.id){
+            // cartState[i].quantity+=cartItem.quantity;
+            cartState[i].quantity = cartState[i].quantity + 1;
+            flag=true;
+        }
+    }
+
+    console.log(cartItem.quantity)
+    return cartItem.quantity;
+}
+
+function decreaseItemQuantityCart(cartItem){
+
+    let flag=false;
+    for(let i=0; i<cartState.length; i++){
+        if(cartState[i].id==cartItem.id){
+            cartState[i].quantity = cartState[i].quantity -1;
+            flag = true;
+        }
+    }
+
+    console.log(cartItem.quantity);
+    return cartItem.quantity;
+}
+
+function deleteItemFromCart(cartItem){
+
+    let flag=false;
+    for(let i=0; i<cartState.length; i++){
+        if(cartState[i].id==cartItem.id){
+            
+            cartState.splice(cartItem[i], 1)
+            flag=true;
+        }
+    }
+
+    console.log(cartState);
 }
 
 
@@ -933,7 +1087,54 @@ async function attachOrders(){
     const orderedProducts = arr.map((e) => createOrderedCard(e))
     orderedProducts.forEach((produs) => {
         tableContainer.appendChild(produs);
+        
     })
 
+
+    //attach the Total Orders number
+    let totalOrders = document.querySelector(".total-orders-number")
+    totalOrders.textContent=`${orderedProducts.length}`
+    console.log(orderedProducts.length);
+
+    //calculate money amount on TOTAL orders
+    calculateOrdersTotalAmount();
+
+
+
     console.log(arr);
+}
+
+async function calculateOrdersTotalAmount(){
+
+    let arr = await getUserOrders();
+    let moneyAmount = document.querySelector(".money-spent-amount");
+
+    let total = 0;
+    console.log(arr);
+
+    // console.log(amountOrders);
+
+    for(let i=0;i<arr.length;i++){
+
+        
+        total+=arr[i].amount;
+    }
+    console.log(total);
+    moneyAmount.textContent = total;
+    // let comenzi = arr.map((order) => createOrderAmountCard(order)).forEach(total = total + order);
+    // console.log(comenzi);
+    // console.log(total);
+
+}
+
+
+function createOrderAmountCard(order){
+
+    let card = document.createElement('p');
+    card.classList.add('order-amount');
+
+    card.textContent = order.amount;
+    
+    console.log(card.textContent);
+    return card.textContent;
 }

@@ -145,6 +145,19 @@ async function getUserOrders(){
     return data.list;
 }
 
+async function getOrdersAmount(){
+    let token = localStorage.getItem('authToken');
+
+    let response = await api("/order/getCustomerOrders", 'GET', null, token);
+    let data = await response.json();
+
+    console.log(data.list[1].amount, data.list[2].amount);
+    return (data.list[1].amount, data.list[2].amount);
+}
+
+
+
+
 async function createProduct(productBody){
     let token = await getToken();
     
